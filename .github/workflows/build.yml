@@ -1,0 +1,42 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry: 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment
+          region: us-east-1
+
+      - name: Build MySQL Docker image
+        run: docker build -t my_db -f Dockerfile_mysql .
+        working-directory: environment/1/docker
+
+      - name: Build Application Docker image
+        run: docker build -t my_app -f Dockerfile .
+        working-directory: environment/1/docker
+
+      - name: Push MySQL Docker image to ECR
+        run: docker tag my_db 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
+        working-directory: environment/1/docker 
+
+      - name: Push Application Docker image to ECR
+        run: docker tag my_app 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
+        working-directory: environment/1/docker 
+
+      - name: Push MySQL Docker image
+        run: docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
+
+      - name: Push Application Docker image
+        run: docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
