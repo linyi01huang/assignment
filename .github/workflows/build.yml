@@ -7,14 +7,14 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.7.0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -37,11 +37,11 @@ jobs:
 
       - name: Push MySQL Docker image to ECR
         run: docker tag my_db 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
-        working-directory: environment/1/docker
+        working-directory: /docker
 
       - name: Push Application Docker image to ECR
         run: docker tag my_app 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
-        working-directory: environment/1/docker
+        working-directory: /docker
 
       - name: Push MySQL Docker image
         run: docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
