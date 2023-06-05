@@ -26,26 +26,33 @@ jobs:
           echo "region=us-east-1" >> $HOME/.aws/credentials
 
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 553085735006.dkr.ecr.us-east-1.amazonaws.com
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 553085735006.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Build MySQL Docker image
-        run: docker build -t my_db -f Dockerfile_mysql .
-        working-directory: environment/1/docker
+        run: |
+          docker build -t my_db -f Dockerfile_mysql .
+          cd environment/1/docker
 
       - name: Build Application Docker image
-        run: docker build -t my_app -f Dockerfile .
-        working-directory: environment/1/docker
+        run: |
+          docker build -t my_app -f Dockerfile .
+          cd environment/1/docker
 
       - name: Push MySQL Docker image to ECR
-        run: docker tag my_db 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
-        working-directory: /docker
+        run: |
+          docker tag my_db 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
+          cd environment/1/docker
 
       - name: Push Application Docker image to ECR
-        run: docker tag my_app 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
-        working-directory: /docker
+        run: |
+          docker tag my_app 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
+          cd environment/1/docker
 
       - name: Push MySQL Docker image
-        run: docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
+        run: |
+          docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
 
       - name: Push Application Docker image
-        run: docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
+        run: |
+          docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
