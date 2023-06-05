@@ -1,58 +1,39 @@
-name: Build and Push Docker Images
-
-on:
+name: Deploy to ECR
+# updated secrets
+on: 
   push:
-    branches:
-      - development
+    branches: development
 
 jobs:
-  build-and-push:
+  
+  build:
+    
+    name: Build Image
     runs-on: ubuntu-latest
 
+   
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+        AWS_REGION: us-east-1
         
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1.7.0
-
-      - name: Configure AWS credentials
-        run: |
-          mkdir -p $HOME/.aws
-          echo "[default]" >> $HOME/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $HOME/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
-          echo "aws_session_token=${{ secrets.AWS_SESSION_TOKEN }}" >> $HOME/.aws/credentials
-          echo "region=us-east-1" >> $HOME/.aws/credentials
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 553085735006.dkr.ecr.us-east-1.amazonaws.com
-
-      - name: Build MySQL Docker image
-        run: |
+    - name: Build and push MySQL Docker image
+        run:|
           docker build -t my_db -f Dockerfile_mysql .
-          cd environment/1/docker
+          docker tag my_db:latest <your-ecr-repository-url>/my_db:latest
+          docker push <your-ecr-repository-url>/my_db:latest
 
-      - name: Build Application Docker image
-        run: |
+    - name: Build and push application Docker image
+        run:|
           docker build -t my_app -f Dockerfile .
-          cd environment/1/docker
-
-      - name: Push MySQL Docker image to ECR
-        run: |
-          docker tag my_db 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
-          cd environment/1/docker
-
-      - name: Push Application Docker image to ECR
-        run: |
-          docker tag my_app 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
-          cd environment/1/docker
-
-      - name: Push MySQL Docker image
-        run: |
-          docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:mysql
-
-      - name: Push Application Docker image
-        run: |
-          docker push 553085735006.dkr.ecr.us-east-1.amazonaws.com/assignment/assignment:application
+          docker tag my_app:latest <your-ecr-repository-url>/my_app:latest
+          docker push <your-ecr-repository-url>/my_app:latest
